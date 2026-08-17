@@ -331,20 +331,30 @@ problema de experiencia aunque el sistema técnicamente se comporte bien.
 Adicionalmente, Serenity captura pantallazos automáticos de los pasos fallidos,
 lo que permite revisar visualmente qué veía el usuario en el momento del fallo.
 
-### d. ¿Qué fue lo que más te llamó la atención o te pareció interesante?
+### d. ¿Qué fue lo que más te llamó la atención o te pareció interesante? ¿Qué parte del ejercicio disfrutaste más o consideraste más relevante y por qué?
 
-> **Nota:** esta respuesta es personal. Lo que sigue es un punto de partida
-> basado en el trabajo realizado; conviene ajustarlo a tu propia experiencia
-> antes de entregar.
+Lo que más disfruté fue el momento en que me di cuenta de que la suite estaba
+"demasiado verde". Había terminado los cuatro módulos, todo pasaba, y aun así
+algo no me cuadraba: en la prueba de backend había encontrado seis defectos y
+aquí ninguno. Me puse a mirar por qué, y la respuesta era que solo había probado
+con `standard_user`. Swag Labs publica en su propia pantalla de login varios
+usuarios más, y `problem_user` existe precisamente para que aparezcan fallas.
 
-Lo más interesante fue comprobar cuánto mejora la legibilidad al aplicar
-Screenplay de forma estricta. Al leer una step definition no se ve un solo
-selector: se lee que el actor se autentica, agrega productos y finaliza la
-compra. El reporte de Serenity hereda esa misma narrativa, de modo que una
-persona sin conocimientos técnicos puede seguir exactamente qué se probó.
+Explorar con ese usuario fue la parte más entretenida del ejercicio. Aparecieron
+cuatro defectos: todas las imágenes del catálogo son la misma, la mitad de los
+productos no se puede agregar al carrito, el ordenamiento no hace nada aunque el
+selector cambie, y —el más curioso de todos— lo que escribes en el campo Apellido
+se va al campo Nombre, letra por letra, sobrescribiéndolo. Ese último me tomó un
+rato entenderlo porque el resultado en pantalla parecía aleatorio, hasta que caí
+en que la "z" que quedaba era la última letra de "Munoz".
 
-También resultó revelador el contraste con la prueba de backend. Allí el valor
-estuvo en encontrar defectos del servicio; aquí, en construir una estructura que
-resista los cambios de una interfaz, que es lo que suele romper las suites de
-UI. Son dos formas distintas de aportar calidad y el ejercicio permitió
-practicar ambas.
+Me pareció la parte más relevante porque deja clara una idea: que las pruebas
+pasen no significa que el producto esté bien; puede significar que no estás
+mirando donde hay que mirar. Es fácil quedarse en el camino feliz y sentir que
+el trabajo está hecho.
+
+En lo técnico, lo que más me gustó fue Screenplay. Al leer una step definition no
+aparece ni un selector: se lee que el actor se autentica, agrega productos y
+finaliza la compra. Y el reporte de Serenity hereda esa misma narrativa, así que
+alguien sin perfil técnico puede seguir perfectamente qué se probó. Eso me parece
+muy valioso para explicar el trabajo de QA a un equipo o a un cliente.
