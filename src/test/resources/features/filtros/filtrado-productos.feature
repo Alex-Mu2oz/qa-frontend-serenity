@@ -36,3 +36,12 @@ Característica: Ordenamiento y filtrado del catálogo
     Y ordena el catalogo por "nombre ascendente"
     Entonces los productos deberian quedar ordenados alfabeticamente de forma ascendente
     Y el catalogo deberia mostrar 6 productos
+
+  @negativo
+  Escenario: Solicitar un criterio de orden inexistente es rechazado por la automatización
+    # El selector no admite valores arbitrarios, así que el caso negativo se da
+    # antes de tocar el navegador: el modelo rechaza un criterio desconocido en
+    # lugar de enviarlo al sitio y fallar con un error de Selenium poco claro.
+    Cuando intenta ordenar el catalogo por "orden inventado"
+    Entonces la automatizacion deberia rechazar el criterio indicando los valores validos
+    Y el catalogo deberia mostrar 6 productos

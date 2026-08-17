@@ -48,8 +48,12 @@ observar la interacción real:
 ### Ejecutar un subconjunto por tags
 
 ```bash
-./gradlew clean test -Dcucumber.filter.tags="@autenticacion"
+./gradlew clean test "-Dcucumber.filter.tags=@autenticacion"
 ```
+
+> **Importante en PowerShell:** la comilla debe abrir **antes** del guion. Con
+> `-Dcucumber.filter.tags="@autenticacion"` PowerShell parte el argumento en el
+> signo igual y Gradle falla con `Task '.filter.tags=@autenticacion' not found`.
 
 Tags disponibles:
 
@@ -62,7 +66,7 @@ Tags disponibles:
 | `@smoke` | Escenarios críticos de cada módulo |
 | `@negativo` | Escenarios de error y validaciones |
 
-Combinaciones: `-Dcucumber.filter.tags="@smoke and not @negativo"`
+Combinaciones: `"-Dcucumber.filter.tags=@smoke and not @negativo"`
 
 ---
 
@@ -164,19 +168,58 @@ paso de Gherkin a una tarea o una pregunta.
 
 ## Cobertura
 
-Última ejecución: **20 escenarios (25 ejecuciones con los esquemas expandidos), 0 fallos**.
+Última ejecución: **27 escenarios, 32 ejecuciones con los esquemas expandidos,
+517 pasos, 0 fallos**.
 
 | Módulo | Escenarios | Negativos | Qué cubre |
 |---|---|---|---|
-| Autenticación | 3 (+4 ejemplos) | 5 | Login válido, logout, usuario bloqueado, credenciales inválidas y campos vacíos |
+| Autenticación | 4 | 2 | Login válido, logout, usuario bloqueado, credenciales inválidas y campos vacíos |
 | Gestión de productos | 5 | 1 | Listado, agregar, agregar múltiples, remover, contador del carrito |
-| Filtrado / ordenamiento | 6 | 0 | Orden A-Z, Z-A, precio ascendente y descendente, integridad del catálogo |
-| Carrito y checkout | 4 (+3 ejemplos) | 3 | Contenido del carrito, compra completa, resumen y validación del formulario |
+| Filtrado / ordenamiento | 7 | 1 | Orden A-Z, Z-A, precio ascendente y descendente, integridad del catálogo, criterio inválido |
+| Carrito y checkout | 6 | 1 | Contenido del carrito, compra completa, resumen, **cálculo de subtotal e impuesto** y validación del formulario |
+| Defectos del sitio | 5 | 4 | Fallas reales detectadas con `problem_user`, más un contraste con `standard_user` |
 
 Todos los módulos exigidos por el enunciado están cubiertos e incluyen al menos
-un escenario negativo, salvo el de ordenamiento, donde el catálogo no expone
-entradas inválidas posibles; en su lugar se validan invariantes (que ordenar no
-altere la cantidad de productos).
+un escenario negativo.
+
+La validación del **cálculo del total** merece mención aparte: comprueba que el
+subtotal informado sea la suma real de los artículos y que el total sea el
+subtotal más el impuesto. En una tienda es el riesgo de negocio más alto, y no
+se detecta verificando únicamente que los productos lleguen al carrito.
+
+---
+
+## Hallazgos QA
+
+Swag Labs publica varios usuarios además del estándar. Probar únicamente con
+`standard_user` deja sin ejercitar la parte del sitio donde están los defectos.
+Al ejecutar los mismos flujos con **`problem_user`** aparecieron cuatro fallas
+reales, todas reproducidas y verificadas antes de escribir el escenario.
+
+| # | Módulo | Comportamiento observado | Comportamiento esperado |
+|---|---|---|---|
+| 1 | Catálogo | Los 6 productos muestran **la misma imagen**, `sl-404.jpg` (marcador de imagen no encontrada) | Una imagen propia por producto, como sí ocurre con `standard_user` |
+| 2 | Carrito | De 6 productos, **sólo 3 se agregan**; los otros 3 botones no reaccionan | Los 6 productos deben poder agregarse |
+| 3 | Ordenamiento | **Los 4 criterios devuelven el mismo orden**. El selector cambia de valor pero la lista no se reordena | Cada criterio debe reordenar el catálogo |
+| 4 | Checkout | Lo escrito en **Apellido se desvía al campo Nombre**, carácter a carácter y sobrescribiéndolo. Tras escribir "Wilson" y "Munoz", queda Nombre="z" y Apellido vacío | Cada campo debe recibir su propio texto |
+
+### Criterio aplicado
+
+Igual que en la prueba de backend, los escenarios afirman el **comportamiento
+real** y van marcados con `@defecto`. Así la suite queda verde y un fallo futuro
+significa inequívocamente que el defecto se corrigió, en lugar de mantener
+escenarios permanentemente en rojo que dejan de leerse.
+
+El feature incluye además un escenario `@contraste` que ejecuta la misma
+comprobación con `standard_user` y pasa correctamente. Sirve para demostrar con
+evidencia —y no con una afirmación— que las fallas dependen del usuario y no son
+una limitación del sitio ni un error de la automatización.
+
+Para ver sólo estos escenarios:
+
+```bash
+./gradlew clean test "-Dcucumber.filter.tags=@defectos"
+```
 
 ---
 
@@ -217,7 +260,16 @@ que ningún escenario herede sesión o carrito de otro.
 
 ### a. ¿Cuáles fueron los principales desafíos al implementar las funcionalidades?
 
-El principal desafío fue ajustar el código a la API real de Serenity 5 en lugar
+El desafío de fondo fue de criterio, no técnico: la primera versión de la suite
+pasaba al 100% y no encontraba un solo defecto. Eso debería haber sido una señal
+de alarma, porque una suite que nunca falla puede significar tanto que el
+producto está sano como que no se está mirando donde duele. Swag Labs publica
+usuarios de prueba —`problem_user`, `locked_out_user`— precisamente para que
+aparezcan fallas, y la suite sólo ejercitaba `standard_user`. Al ampliarla
+surgieron cuatro defectos reales. También faltaba la validación del cálculo del
+total, que es el mayor riesgo de negocio en una tienda.
+
+El segundo desafío fue ajustar el código a la API real de Serenity 5 en lugar
 de a la que uno recuerda de versiones anteriores. Aparecieron cuatro problemas
 de compilación —`Text.of().asList()` que ya no existe, `Ensure` que exige
 `Question<Collection<T>>` y no `Question<List<T>>`, el engine de Cucumber
@@ -226,14 +278,14 @@ combinaciones a ciegas, se inspeccionaron los `.jar` con `javap` para leer las
 firmas reales antes de cada corrección. Fue notablemente más rápido que iterar
 por ensayo y error.
 
-El segundo desafío fue la resolución de la URL base. Inicialmente se usó un
+El tercer desafío fue la resolución de la URL base. Inicialmente se usó un
 `PageObject` con `@DefaultUrl("#{webdriver.base.url}")`, pero el placeholder
 sólo se expande cuando Serenity instancia la clase por reflexión, no al crearla
 con `new`. Los 25 escenarios fallaron con `Invalid URL`. Se reemplazó por una
 utilidad que lee la configuración de forma explícita, lo que además respeta la
 sección de ambiente activa.
 
-El tercero fue de diseño: decidir cómo localizar los productos. Usar los `id`
+El último fue de diseño: decidir cómo localizar los productos. Usar los `id`
 generados a partir del título habría sido más directo, pero acopla las pruebas
 a una convención interna del sitio; localizar por nombre visible mantiene los
 escenarios legibles y más estables.

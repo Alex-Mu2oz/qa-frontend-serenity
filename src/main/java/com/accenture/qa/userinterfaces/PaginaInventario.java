@@ -22,8 +22,14 @@ public class PaginaInventario {
     public static final Target PRECIOS_DE_PRODUCTO = Target.the("precios de los productos")
             .locatedBy(".inventory_item_price");
 
+    public static final Target IMAGENES_DE_PRODUCTO = Target.the("imagenes de los productos")
+            .locatedBy(".inventory_item_img img");
+
     public static final Target SELECTOR_DE_ORDEN = Target.the("selector de ordenamiento")
             .locatedBy(".product_sort_container");
+
+    public static final Target BOTONES_AGREGAR = Target.the("botones de agregar al carrito")
+            .locatedBy("button[data-test^='add-to-cart']");
 
     /**
      * Boton de agregar al carrito de un producto identificado por su nombre.

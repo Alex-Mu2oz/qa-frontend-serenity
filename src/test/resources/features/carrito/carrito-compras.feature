@@ -37,6 +37,16 @@ Característica: Carrito de compras y proceso de checkout
     Entonces deberia ver la seccion "Checkout: Overview"
     Y el carrito deberia contener 2 productos
 
+  @smoke
+  Escenario: El resumen calcula correctamente el subtotal y el total a pagar
+    Cuando agrega al carrito los productos:
+      | Sauce Labs Backpack   |
+      | Sauce Labs Bike Light |
+    Y abre el carrito de compras
+    Y diligencia los datos de compra validos
+    Entonces el subtotal deberia ser la suma de los articulos
+    Y el total deberia ser el subtotal mas el impuesto
+
   Escenario: Comprar un solo producto llega hasta la confirmación
     Cuando agrega al carrito el producto "Sauce Labs Bike Light"
     Y abre el carrito de compras

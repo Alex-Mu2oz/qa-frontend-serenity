@@ -25,8 +25,17 @@ public class PaginaCheckout {
     public static final Target MENSAJE_DE_ERROR = Target.the("mensaje de error del formulario")
             .locatedBy("[data-test='error']");
 
+    public static final Target SUBTOTAL_DEL_RESUMEN = Target.the("subtotal de articulos")
+            .locatedBy(".summary_subtotal_label");
+
+    public static final Target IMPUESTO_DEL_RESUMEN = Target.the("impuesto del resumen")
+            .locatedBy(".summary_tax_label");
+
     public static final Target TOTAL_DEL_RESUMEN = Target.the("total del resumen")
             .locatedBy(".summary_total_label");
+
+    public static final Target PRECIOS_DE_ITEMS = Target.the("precios de los items del resumen")
+            .locatedBy(".cart_item .inventory_item_price");
 
     public static final Target MENSAJE_DE_CONFIRMACION = Target.the("mensaje de confirmacion")
             .locatedBy(".complete-header");

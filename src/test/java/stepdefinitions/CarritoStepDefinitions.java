@@ -1,9 +1,12 @@
 package stepdefinitions;
 
 import com.accenture.qa.models.DatosDeCompra;
+import com.accenture.qa.models.TotalesDeCompra;
 import com.accenture.qa.questions.MensajeDeConfirmacion;
 import com.accenture.qa.questions.MensajeDeError;
+import com.accenture.qa.questions.PreciosEnElResumen;
 import com.accenture.qa.questions.ProductosEnElCarrito;
+import com.accenture.qa.questions.ResumenDeCompra;
 import com.accenture.qa.questions.TituloDeLaSeccion;
 import com.accenture.qa.tasks.AbrirElCarrito;
 import com.accenture.qa.tasks.DiligenciarDatosDeCompra;
@@ -13,6 +16,7 @@ import io.cucumber.java.es.Entonces;
 import io.cucumber.java.es.Y;
 import net.serenitybdd.screenplay.ensure.Ensure;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static net.serenitybdd.screenplay.actors.OnStage.theActorInTheSpotlight;
@@ -76,6 +80,29 @@ public class CarritoStepDefinitions {
     public void deberiaVerElErrorDelFormulario(String mensajeEsperado) {
         theActorInTheSpotlight().attemptsTo(
                 Ensure.that(MensajeDeError.visible()).contains(mensajeEsperado)
+        );
+    }
+
+    @Entonces("el subtotal deberia ser la suma de los articulos")
+    public void elSubtotalDeberiaSerLaSumaDeLosArticulos() {
+        BigDecimal sumaDeArticulos = PreciosEnElResumen.deLosArticulos()
+                .answeredBy(theActorInTheSpotlight())
+                .stream()
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        TotalesDeCompra totales = ResumenDeCompra.mostrado().answeredBy(theActorInTheSpotlight());
+
+        theActorInTheSpotlight().attemptsTo(
+                Ensure.that(totales.subtotal()).isEqualTo(sumaDeArticulos)
+        );
+    }
+
+    @Y("el total deberia ser el subtotal mas el impuesto")
+    public void elTotalDeberiaSerElSubtotalMasElImpuesto() {
+        TotalesDeCompra totales = ResumenDeCompra.mostrado().answeredBy(theActorInTheSpotlight());
+
+        theActorInTheSpotlight().attemptsTo(
+                Ensure.that(totales.total()).isEqualTo(totales.totalEsperado())
         );
     }
 }

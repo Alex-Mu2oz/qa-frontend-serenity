@@ -16,6 +16,8 @@ import static net.serenitybdd.screenplay.actors.OnStage.theActorInTheSpotlight;
 
 public class FiltradoStepDefinitions {
 
+    private IllegalArgumentException errorAlResolverCriterio;
+
     @Cuando("ordena el catalogo por {string}")
     public void ordenaElCatalogoPor(String descripcionDelCriterio) {
         theActorInTheSpotlight().attemptsTo(
@@ -68,6 +70,27 @@ public class FiltradoStepDefinitions {
         theActorInTheSpotlight().attemptsTo(
                 Ensure.that(nombres).isNotEmpty(),
                 Ensure.that(nombres.get(0)).isEqualTo(nombreEsperado)
+        );
+    }
+
+    @Cuando("intenta ordenar el catalogo por {string}")
+    public void intentaOrdenarElCatalogoPor(String descripcionInvalida) {
+        try {
+            CriterioDeOrden.desdeDescripcion(descripcionInvalida);
+            errorAlResolverCriterio = null;
+        } catch (IllegalArgumentException e) {
+            errorAlResolverCriterio = e;
+        }
+    }
+
+    @Entonces("la automatizacion deberia rechazar el criterio indicando los valores validos")
+    public void laAutomatizacionDeberiaRechazarElCriterio() {
+        theActorInTheSpotlight().attemptsTo(
+                Ensure.that(errorAlResolverCriterio != null).isTrue(),
+                Ensure.that(errorAlResolverCriterio.getMessage())
+                        .contains("Criterio de orden no reconocido"),
+                Ensure.that(errorAlResolverCriterio.getMessage())
+                        .contains("NOMBRE_ASCENDENTE")
         );
     }
 

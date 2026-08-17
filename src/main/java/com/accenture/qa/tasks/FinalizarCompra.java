@@ -1,5 +1,6 @@
 package com.accenture.qa.tasks;
 
+import com.accenture.qa.interactions.DesplazarseHasta;
 import com.accenture.qa.userinterfaces.PaginaCheckout;
 import net.serenitybdd.annotations.Step;
 import net.serenitybdd.screenplay.Actor;
@@ -20,6 +21,9 @@ public class FinalizarCompra implements Task {
     @Override
     @Step("{0} finaliza la compra")
     public <T extends Actor> void performAs(T actor) {
-        actor.attemptsTo(Click.on(PaginaCheckout.BOTON_FINALIZAR));
+        actor.attemptsTo(
+                DesplazarseHasta.el(PaginaCheckout.BOTON_FINALIZAR),
+                Click.on(PaginaCheckout.BOTON_FINALIZAR)
+        );
     }
 }
