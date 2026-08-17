@@ -66,19 +66,18 @@ test {
 // Permite que la agregacion del reporte se ejecute incluso si `test` falla
 gradle.startParameter.continueOnFailure = true
 
-// El nombre del proyecto y el formato del reporte se configuran en
+// El nombre del proyecto y las opciones del reporte se configuran en
 // src/test/resources/serenity.conf, para mantener una sola fuente de verdad.
-// Aqui solo se reubica la salida: por defecto Serenity escribe en
-// target/site/serenity (convencion de Maven), y en un proyecto Gradle
-// corresponde dejarla bajo build/.
-serenity {
-    outputDirectory = "${projectDir}/build/reports/serenity"
-}
+//
+// La salida se deja en la ruta por defecto de Serenity (target/site/serenity):
+// reubicarla exige mover de forma coordinada tanto el directorio donde la
+// ejecucion escribe los resultados como el que lee la tarea de agregacion, y
+// desalinearlos produce un reporte vacio aunque las pruebas hayan pasado.
 
 tasks.register('reportPath') {
     group = 'verification'
     description = 'Muestra la ruta del reporte de Serenity'
     doLast {
-        println "Reporte Serenity: ${layout.buildDirectory.get()}/reports/serenity/index.html"
+        println "Reporte Serenity: ${projectDir}/target/site/serenity/index.html"
     }
 }

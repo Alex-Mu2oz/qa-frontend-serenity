@@ -73,7 +73,7 @@ incluso si hay escenarios fallidos.
 
 | Reporte | Ruta |
 |---|---|
-| **Serenity (HTML)** | `build/reports/serenity/index.html` |
+| **Serenity (HTML)** | `target/site/serenity/index.html` |
 
 Para imprimir la ruta por consola:
 
@@ -84,6 +84,34 @@ Para imprimir la ruta por consola:
 El reporte muestra el detalle paso a paso de cada escenario en el lenguaje del
 negocio —gracias a las anotaciones `@Step` de las tareas de Screenplay— junto
 con capturas de pantalla automáticas de los pasos fallidos.
+
+### Cómo leer el reporte
+
+Al abrir `index.html`, las pestañas relevantes son:
+
+| Pestaña | Qué muestra |
+|---|---|
+| **Overall Test Results** | Resumen: total de pruebas, pasadas, fallidas y duración |
+| **Features** | Cada `.feature` con sus escenarios y su estado |
+| **Test Results** | Listado plano de todas las ejecuciones |
+
+La pestaña **Requirements** aparece vacía y es normal: corresponde a la
+jerarquía de requisitos, que este proyecto no define.
+
+Al hacer clic sobre cualquier escenario se abre su detalle paso a paso, con la
+captura de pantalla del momento del fallo si lo hubo.
+
+### Otras fuentes de resultados
+
+Independientes del reporte HTML, útiles para revisar en consola o en CI:
+
+| Fuente | Ruta |
+|---|---|
+| Conteo crudo (JUnit XML) | `build/test-results/test/*.xml` |
+| Reporte estándar de Gradle | `build/reports/tests/test/index.html` |
+
+La consola de `gradlew test` también imprime cada escenario con `PASSED` o
+`FAILED`, y el stacktrace completo de los que fallen.
 
 ---
 
