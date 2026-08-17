@@ -1,0 +1,84 @@
+plugins {
+    id 'java'
+    id 'net.serenity-bdd.serenity-gradle-plugin' version '5.3.9'
+}
+
+group = 'com.accenture.qa'
+version = '1.0.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    serenityVersion = '5.3.9'
+    junitVersion = '5.11.3'
+    // Debe coincidir con la version de Cucumber que arrastra serenity-cucumber
+    cucumberVersion = '7.34.2'
+}
+
+dependencies {
+    // Screenplay: las tareas, preguntas e interacciones viven en src/main/java
+    implementation "net.serenity-bdd:serenity-core:${serenityVersion}"
+    implementation "net.serenity-bdd:serenity-screenplay:${serenityVersion}"
+    implementation "net.serenity-bdd:serenity-screenplay-webdriver:${serenityVersion}"
+    implementation "net.serenity-bdd:serenity-ensure:${serenityVersion}"
+
+    // Ejecucion de los escenarios Gherkin y reporte
+    testImplementation "net.serenity-bdd:serenity-cucumber:${serenityVersion}"
+    testImplementation "net.serenity-bdd:serenity-junit5:${serenityVersion}"
+
+    // El engine de Cucumber para JUnit Platform: aporta las constantes de
+    // configuracion que usa el runner y ejecuta los .feature
+    testImplementation "io.cucumber:cucumber-junit-platform-engine:${cucumberVersion}"
+
+    testImplementation "org.junit.jupiter:junit-jupiter:${junitVersion}"
+    testImplementation 'org.junit.platform:junit-platform-suite:1.11.3'
+    testImplementation 'org.assertj:assertj-core:3.26.3'
+}
+
+test {
+    useJUnitPlatform()
+
+    // Propaga los -D de la linea de comandos, por ejemplo:
+    //   ./gradlew clean test -Dheadless.mode=false
+    //   ./gradlew clean test -Dcucumber.filter.tags="@autenticacion"
+    systemProperties System.getProperties()
+
+    // Las pruebas dependen de un sitio externo: nunca deben marcarse up-to-date
+    outputs.upToDateWhen { false }
+
+    testLogging {
+        events 'passed', 'failed', 'skipped'
+        exceptionFormat = 'full'
+    }
+
+    // Genera el reporte de Serenity aunque haya escenarios fallidos
+    finalizedBy 'aggregate'
+}
+
+// Permite que la agregacion del reporte se ejecute incluso si `test` falla
+gradle.startParameter.continueOnFailure = true
+
+// El nombre del proyecto y el formato del reporte se configuran en
+// src/test/resources/serenity.conf, para mantener una sola fuente de verdad.
+// Aqui solo se reubica la salida: por defecto Serenity escribe en
+// target/site/serenity (convencion de Maven), y en un proyecto Gradle
+// corresponde dejarla bajo build/.
+serenity {
+    outputDirectory = "${projectDir}/build/reports/serenity"
+}
+
+tasks.register('reportPath') {
+    group = 'verification'
+    description = 'Muestra la ruta del reporte de Serenity'
+    doLast {
+        println "Reporte Serenity: ${layout.buildDirectory.get()}/reports/serenity/index.html"
+    }
+}
